@@ -1,24 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-function App() {
+import HomePage from './pages/hompage/homepage.component';
+import Header from './components/header/header.component';
+import UserPreview from './components/user-preview/user-preview.component';
+
+
+const App = () => {
+
+  const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(
+    () => {
+      fetch('https://reqres.in/api/users?per_page=12',
+        { method: 'GET' })
+        .then(res => res.json())
+        .then(data => setUsers(data.data))
+        .catch(err => console.log('we can show error On page through this saving this err string'));
+    }
+  )
+
+  const onClickChangeUser = (event) => {
+    const userId = event.currentTarget.dataset.id_key;
+    console.log('userId ', userId);
+    setCurrentUser(userId);
+  }
+
+  const resetCurrentUser = () => {
+    setCurrentUser(null);
+  }
+
+  const currentUserDetail = users.filter(user => user.id == currentUser);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='app'>
+      <Header onChangeHandler={resetCurrentUser} currentUser={currentUserDetail} />
+      {currentUser ? <UserPreview user={currentUserDetail[0] || []} /> : <HomePage onClickChangeUser={onClickChangeUser} users={users} currentUser={currentUser} />}
     </div>
   );
 }
